@@ -2,8 +2,172 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import {
   AlertCircle, ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb,
-  Brain, Loader2, ChevronDown, ChevronUp, AlertOctagon, Info, Sparkles
+  Brain, Loader2, ChevronDown, ChevronUp, AlertOctagon, Info, Sparkles,
+  BarChart2
 } from "lucide-react";
+
+// ─── Student Metrics Chart ────────────────────────────────────────────────────
+interface MetricBarProps {
+  label: string;
+  value: number;       // 0–100 normalized
+  ideal: number;       // 0–100 benchmark
+  rawLabel: string;    // e.g. "3.8 GPA"
+  delay: number;
+}
+
+function MetricBar({ label, value, ideal, rawLabel, delay }: MetricBarProps) {
+  const pct = Math.min(Math.max(value, 0), 100);
+  const color =
+    pct >= ideal ? "#10b981"        // emerald - good
+    : pct >= ideal * 0.7 ? "#f59e0b" // amber - average
+    : "#ef4444";                      // red - at risk
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-gray-400 font-medium">{label}</span>
+        <span style={{ color }} className="font-semibold">{rawLabel}</span>
+      </div>
+      <div className="relative h-2.5 bg-gray-800 rounded-full overflow-hidden">
+        {/* Ideal marker */}
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-gray-500/60 z-10"
+          style={{ left: `${ideal}%` }}
+        />
+        {/* Animated fill */}
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.9, delay, ease: [0.4, 0, 0.2, 1] }}
+        />
+      </div>
+      <div className="flex justify-between text-[10px] text-gray-600">
+        <span>0</span>
+        <span className="text-gray-500">Ideal: {ideal}%</span>
+        <span>100</span>
+      </div>
+    </div>
+  );
+}
+
+function StudentMetricsChart({ inputData }: { inputData: any }) {
+  if (!inputData) return null;
+
+  // Normalize all values to 0-100 scale with benchmarks
+  const metrics: MetricBarProps[] = [
+    {
+      label: "GPA / Score",
+      value: ((inputData.gpa - 0) / 4) * 100,
+      ideal: 75, // 3.0 / 4.0
+      rawLabel: `${inputData.gpa} GPA`,
+      delay: 0.1,
+    },
+    {
+      label: "Attendance",
+      value: inputData.attendance,
+      ideal: 80,
+      rawLabel: `${inputData.attendance}%`,
+      delay: 0.2,
+    },
+    {
+      label: "Study Hours",
+      value: (inputData.study_hours / 10) * 100,
+      ideal: 40, // 4hrs / 10
+      rawLabel: `${inputData.study_hours} hrs/day`,
+      delay: 0.3,
+    },
+    {
+      label: "Assignment Rate",
+      value: inputData.assignment_rate,
+      ideal: 80,
+      rawLabel: `${inputData.assignment_rate}%`,
+      delay: 0.4,
+    },
+    {
+      label: "Sleep Quality",
+      // 7-8hrs is ideal (100%). Below 6 or above 9 penalized
+      value: inputData.sleep_hours >= 7 && inputData.sleep_hours <= 9
+        ? 100
+        : inputData.sleep_hours < 7
+        ? (inputData.sleep_hours / 7) * 80
+        : Math.max(0, 100 - (inputData.sleep_hours - 9) * 20),
+      ideal: 80,
+      rawLabel: `${inputData.sleep_hours} hrs/day`,
+      delay: 0.5,
+    },
+    {
+      label: "Stress Control",
+      value: inputData.stress_level === "Low" ? 100
+           : inputData.stress_level === "Medium" ? 60
+           : 20,
+      ideal: 60,
+      rawLabel: inputData.stress_level,
+      delay: 0.6,
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 0.6 }}
+      className="mt-6 p-6 rounded-3xl bg-gray-950/80 border border-gray-800/60 backdrop-blur-xl"
+      style={{ boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)" }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-6">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <BarChart2 className="w-4 h-4 text-blue-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-white">Your Academic Profile</h3>
+          <p className="text-xs text-gray-500">Metrics vs ideal benchmarks</p>
+        </div>
+        {/* Legend */}
+        <div className="ml-auto flex items-center gap-3 text-[10px] text-gray-500">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Good</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block" /> Average</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> Low</span>
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {metrics.map((m) => (
+          <MetricBar key={m.label} {...m} />
+        ))}
+      </div>
+
+      {/* Backlogs & participation pills */}
+      <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-gray-800/50">
+        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+          inputData.backlogs === 0
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            : "bg-red-500/10 border-red-500/20 text-red-400"
+        }`}>
+          {inputData.backlogs === 0 ? "✓ No Backlogs" : `✗ ${inputData.backlogs} Backlog(s)`}
+        </span>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+          inputData.participation === "Yes"
+            ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+            : "bg-gray-500/10 border-gray-700 text-gray-500"
+        }`}>
+          {inputData.participation === "Yes" ? "✓ Active Participation" : "✗ No Participation"}
+        </span>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+          inputData.extracurricular === "Yes"
+            ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+            : "bg-gray-500/10 border-gray-700 text-gray-500"
+        }`}>
+          {inputData.extracurricular === "Yes" ? "✓ Extracurriculars" : "✗ No Extracurriculars"}
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 interface PredictResultProps {
   onBack: () => void;
@@ -84,10 +248,10 @@ export function PredictResult({ onBack, result, inputData }: PredictResultProps)
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative flex items-center justify-center p-6 overflow-hidden">
-      <div className={`absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${themeColors.bg}`} />
+    <div className="min-h-screen bg-black text-white relative p-6 pb-20 overflow-y-auto">
+      <div className={`fixed inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${themeColors.bg} pointer-events-none`} />
 
-      <div className="relative w-full max-w-2xl">
+      <div className="relative w-full max-w-2xl mx-auto pt-8">
         <motion.button
           onClick={onBack}
           className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors group"
@@ -125,6 +289,12 @@ export function PredictResult({ onBack, result, inputData }: PredictResultProps)
               <span className="font-semibold">{result.score}%</span>
             </div>
           </div>
+
+          {/* Academic Profile Chart — inline with prediction */}
+          <StudentMetricsChart inputData={inputData} />
+
+          {/* Divider before suggestions */}
+          <div className="border-t border-gray-800/50 my-8" />
 
           {/* Suggestions */}
           <div className="mb-8">
