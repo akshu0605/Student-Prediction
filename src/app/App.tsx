@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { GraduationCap, TrendingUp, Award, Clock, BookOpen, Target, Calculator, FlaskConical, Landmark, Code, LogOut } from "lucide-react";
+import { GraduationCap, TrendingUp, Award, Clock, BookOpen, Target, Calculator, FlaskConical, Landmark, Code, LogOut, Users } from "lucide-react";
 import { LineChart } from "./components/LineChart";
 import { BarChart } from "./components/BarChart";
 import { RadarChart } from "./components/RadarChart";
@@ -252,7 +252,7 @@ export default function App() {
             </motion.div>
           </motion.div>
 
-          {/* Spotlight Visual */}
+          {/* 3D Spotlight Visual */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -266,13 +266,21 @@ export default function App() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
               </div>
 
-              {/* Score display in spotlight */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="text-8xl font-bold bg-gradient-to-b from-white to-purple-300 bg-clip-text text-transparent">
+              {/* 3D Score display in spotlight */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  rotateX: [0, 5, 0, -5, 0],
+                  rotateY: [0, -5, 0, 5, 0],
+                }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                style={{ transformStyle: "preserve-3d", perspective: "800px" }}
+              >
+                <div className="text-8xl font-bold bg-gradient-to-b from-white to-purple-300 bg-clip-text text-transparent" style={{ textShadow: "0 0 40px rgba(168,85,247,0.3)" }}>
                   {studentData.predictedScore}
                 </div>
                 <div className="text-sm text-gray-500 text-center mt-2">Predicted Score</div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -496,13 +504,104 @@ export default function App() {
             <p className="text-lg text-gray-500 mb-10">
               Get personalized insights and predictions to excel in your academic journey.
             </p>
-            <button 
+            <motion.button 
               onClick={() => setView("form")}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(255,255,255,0.2)" }}
+              whileTap={{ scale: 0.95 }}
               className="px-8 py-3 bg-white text-black hover:bg-gray-200 rounded font-medium transition-colors"
             >
               Start Predicting Performance
-            </button>
+            </motion.button>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Developer Credits Section */}
+      <section className="py-20 relative border-t border-gray-800/50">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-gray-500" />
+              <p className="text-xs text-gray-500 uppercase tracking-[0.3em] font-medium">Meet the Developers</p>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
+              Built with passion
+            </h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {/* Akshit Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              whileHover={{
+                rotateY: 5,
+                rotateX: -5,
+                scale: 1.03,
+                boxShadow: "0 20px 60px rgba(16,185,129,0.15)",
+              }}
+              className="p-6 rounded-2xl bg-gray-950/50 backdrop-blur-xl border border-gray-800 text-center cursor-default"
+              style={{ transformStyle: "preserve-3d", perspective: "800px" }}
+            >
+              <motion.div
+                className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20"
+                animate={{ rotateY: [0, 360] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <span className="text-2xl font-bold text-white">A</span>
+              </motion.div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-1">Akshit</h3>
+              <p className="text-sm text-gray-400 font-mono">23BCE9259</p>
+              <p className="text-xs text-gray-600 mt-2">Full Stack Developer</p>
+            </motion.div>
+
+            {/* Yuvraj Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              whileHover={{
+                rotateY: -5,
+                rotateX: -5,
+                scale: 1.03,
+                boxShadow: "0 20px 60px rgba(168,85,247,0.15)",
+              }}
+              className="p-6 rounded-2xl bg-gray-950/50 backdrop-blur-xl border border-gray-800 text-center cursor-default"
+              style={{ transformStyle: "preserve-3d", perspective: "800px" }}
+            >
+              <motion.div
+                className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20"
+                animate={{ rotateY: [0, 360] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 1 }}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <span className="text-2xl font-bold text-white">Y</span>
+              </motion.div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">Yuvraj</h3>
+              <p className="text-sm text-gray-400 font-mono">23BCE8817</p>
+              <p className="text-xs text-gray-600 mt-2">Full Stack Developer</p>
+            </motion.div>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="text-center text-gray-600 text-sm mt-10"
+          >
+            © 2026 STDPredict. All rights reserved.
+          </motion.p>
         </div>
       </section>
     </div>
