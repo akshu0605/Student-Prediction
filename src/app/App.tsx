@@ -58,6 +58,7 @@ const averageGPA = radarData.reduce((acc, curr) => acc + curr.score, 0) / radarD
 export default function App() {
   const [view, setView] = useState<"signin" | "signup" | "dashboard" | "form" | "result">("signin");
   const [predictionData, setPredictionData] = useState<any>(null);
+  const [inputData, setInputData] = useState<any>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -91,8 +92,9 @@ export default function App() {
     return (
       <PredictForm 
         onBack={() => setView("dashboard")} 
-        onPredict={(result) => {
+        onPredict={(result, payload) => {
           setPredictionData(result);
+          setInputData(payload);
           setView("result");
         }} 
       />
@@ -104,6 +106,7 @@ export default function App() {
       <PredictResult 
         onBack={() => setView("form")}
         result={predictionData}
+        inputData={inputData}
       />
     );
   }

@@ -4,7 +4,7 @@ import { ArrowLeft, BookOpen, Brain, Clock, Activity, Target, Award, Calendar, Z
 
 interface PredictFormProps {
   onBack: () => void;
-  onPredict: (data: any) => void;
+  onPredict: (data: any, inputData: any) => void;
 }
 
 export function PredictForm({ onBack, onPredict }: PredictFormProps) {
@@ -61,7 +61,7 @@ export function PredictForm({ onBack, onPredict }: PredictFormProps) {
       }
       
       const result = await response.json();
-      onPredict(result);
+      onPredict(result, payload);
       
       
     } catch (err: any) {
